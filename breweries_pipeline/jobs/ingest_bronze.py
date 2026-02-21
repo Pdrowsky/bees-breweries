@@ -7,8 +7,10 @@ from breweries_pipeline.quality.contract import validate_breweries_data
 
 
 logger = logging.getLogger(__name__)
+source = "breweries_api"
+entity = "breweries"
 
-def ingest_to_bronze():
+def ingest_to_bronze(run_id: str, execution_time: str):
     # fetch the breweries data form the API
     breweries = get_all_breweries()
 
@@ -36,5 +38,7 @@ def ingest_to_bronze():
         if not breweries: # if no records left, hard fails
             raise AirflowFailException("All records are missing expected fields, no valid data to save to bronze layer.")
 
+    filename = f"{source}/{entity}/exec_time={execution_time}/run_id={run_id}/data.json"
+
     # saves data to bronze layer
-    save_to_bronze(breweries, "breweries.json")
+    save_to_bronze(breweries, filename)
