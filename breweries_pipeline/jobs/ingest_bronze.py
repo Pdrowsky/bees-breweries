@@ -41,4 +41,6 @@ def ingest_to_bronze(run_id: str, execution_time: str):
     filename = f"{source}/{entity}/exec_time={execution_time}/run_id={run_id}/data.json"
 
     # saves data to bronze layer
-    save_to_bronze(breweries, filename)
+    file_path = save_to_bronze(breweries, filename)
+
+    return file_path
