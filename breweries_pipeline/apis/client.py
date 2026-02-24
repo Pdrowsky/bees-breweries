@@ -4,6 +4,9 @@
 
 import time
 import requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 from breweries_pipeline.apis.config import (
     BASE_URL,
@@ -45,8 +48,15 @@ def get_all_breweries() -> list:
                 break
 
             except requests.exceptions.RequestException as e:
-                print(f"Request failed. Cause: {e}. Retrying in {RETRY_BACKOFF_SEC} seconds.")
+                logger.error(f"Request failed. Cause: {e}. Retrying in {RETRY_BACKOFF_SEC} seconds.")
                 time.sleep(RETRY_BACKOFF_SEC)
+
+                # ============= MONITORING AND ALERTING =============
+                # Post retry, monitoring hooks to Prometheus (or other monitoring system) would be triggered here
+                # Content: endpoint, retry count, error message, etc.
+                # Alerts: send alert on specific errors, if retries > 1, etc.
+                # ===================================================
+
         else:
             raise requests.exceptions.RequestException(
                 f"Failed to fetch breweries after {MAX_RETRIES} retries."

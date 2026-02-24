@@ -45,4 +45,10 @@ def transform_silver(bronze_path: str):
             filename = f"breweries/country={clean_string(country)}/state={clean_string(state)}/data.parquet"
             filepath = save_to_silver(df, filename)
 
+    # ============= MONITORING AND ALERTING =============
+    # Post transformation, monitoring hooks to Prometheus (or other monitoring system) would be triggered here
+    # Content: unique record count, records dropped, "unknown" values count, etc.
+    # Alerts: send if unknown or dropped values are too high
+    # ===================================================
+
     return filepath.split('/country')[0]

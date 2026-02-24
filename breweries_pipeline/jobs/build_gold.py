@@ -15,6 +15,10 @@ def build_gold(silver_path: str):
     filename = "breweries/aggregated/breweries_by_type_country_state.parquet"
     save_to_gold(agg_breweries, filename)
 
-    # create aggregated view with 
+    # ============= MONITORING AND ALERTING =============
+    # Post aggregation, monitoring hooks to Prometheus (or other monitoring system) would be triggered here
+    # Content: aggregated count, count of breweries by type, etc.
+    # Alerts: if aggregated count is too high or too low, if new country/state appears (potential data quality issue)
+    # ===================================================
 
     return filename
