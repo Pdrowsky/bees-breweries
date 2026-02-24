@@ -13,6 +13,5 @@ def validate_breweries_fields(data: list):
         for field in expected_brewery_fields:
             if field not in brewery:
                 errors["missing_fields_indexes"].append(idx)
-                break # no need to check other fields if one is missing
 
     return errors
