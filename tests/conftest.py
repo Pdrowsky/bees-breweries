@@ -28,21 +28,3 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 logger.info(f"Project root: {project_root}")
 logger.info(f"Python path includes: {project_root}")
-
-
-# ==================== MARKERS ====================
-
-def pytest_configure(config):
-    """Register custom pytest markers"""
-    config.addinivalue_line(
-        "markers", "unit: mark test as a unit test"
-    )
-    config.addinivalue_line(
-        "markers", "integration: mark test as an integration test"
-    )
-    config.addinivalue_line(
-        "markers", "slow: mark test as slow running"
-    )
-    config.addinivalue_line(
-        "markers", "api: mark test as requiring API (external dependency)"
-    )
