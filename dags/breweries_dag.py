@@ -1,22 +1,30 @@
 from airflow.decorators import dag, task
 from datetime import timedelta
+import pendulum
 
 from breweries_pipeline.jobs.ingest_bronze import ingest_to_bronze
 from breweries_pipeline.jobs.transform_silver import transform_silver
 from breweries_pipeline.jobs.build_gold import build_gold
 
+
+default_args = {
+    "owner": "data-engineering", # Team responsible for the DAG
+    "retries": 2, # Retry run 2 times max
+    "retry_delay": timedelta(minutes=5), # Delay between retries
+    "email": ["pedro.virgilio@bees.com"], # Who to alert
+    "email_on_failure": True, # Alert on failure
+    "email_on_retry": False, # Don't spam on retry
+}
+
 @dag(
-    dag_id= "breweries",
-    schedule= "@daily", # Run daily
-    retries= 2, # Retry run 2 times max
-    retry_delay= timedelta(minutes=5), # Delay between retries
-    catchup=False, # Don't backfill missed runs
-    owner="data-engineering", # Team responsible for the DAG
-    email=["pedro.virgilio@bees.com"], # Who to alert
-    email_on_failure=True, # Alert on failure
-    email_on_retry=False, # Don't spam on retry
-    max_active_runs=1, # Only one run at a time
+    dag_id="breweries",
+    schedule="@daily",
+    start_date=pendulum.datetime(2026, 2, 24, tz="UTC"),
+    catchup=False,
+    max_active_runs=1,
+    default_args=default_args,
 )
+
 def breweries():
 
     @task
