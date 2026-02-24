@@ -7,9 +7,15 @@ from breweries_pipeline.jobs.build_gold import build_gold
 
 @dag(
     dag_id= "breweries",
-    schedule_interval= "@daily",
-    retries= 2,
-    retry_delay= timedelta(minutes=5)
+    schedule_interval= "@daily", # Run daily
+    retries= 2, # Retry run 2 times max
+    retry_delay= timedelta(minutes=5), # Delay between retries
+    catchup=False, # Don't backfill missed runs
+    owner="data-engineering", # Team responsible for the DAG
+    email=["pedro.virgilio@bees.com"], # Who to alert
+    email_on_failure=True, # Alert on failure
+    email_on_retry=False, # Don't spam on retry
+    max_active_runs=1, # Only one run at a time
 )
 def breweries():
 

@@ -1,6 +1,18 @@
-# - Integrity module -
-#
-# Validates data integrity across the pipeline, ensuring consistency and correctness
-# Handles checks for duplicates, date/time sanity, referential integrity (type/location not null)
-# 
-# Returns integrity check results and error details, if any
+
+expected_brewery_fields = [
+    "id",
+    "name"
+]
+
+def validate_breweries_fields(data: list):
+    errors = {
+        "missing_fields_indexes": []
+    }
+
+    for idx, brewery in enumerate(data):
+        for field in expected_brewery_fields:
+            if field not in brewery:
+                errors["missing_fields_indexes"].append(idx)
+                break # no need to check other fields if one is missing
+
+    return errors
