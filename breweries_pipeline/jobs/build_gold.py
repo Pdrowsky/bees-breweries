@@ -1,5 +1,5 @@
 from breweries_pipeline.datalake.filesystem import read_from_silver, save_to_gold
-from breweries_pipeline.analytics.gold_aggregations import BreweriesByCountryState
+from breweries_pipeline.analytics.gold_aggregations import breweries_by_country_state
 
 
 def build_gold(silver_path: str):
@@ -9,7 +9,7 @@ def build_gold(silver_path: str):
     # reads data from silver layer
     breweries_df = read_from_silver(silver_path)
 
-    agg_breweries = BreweriesByCountryState(breweries_df)
+    agg_breweries = breweries_by_country_state(breweries_df)
 
     # save the aggregated data to gold layer
     filename = "breweries/aggregated/breweries_by_type_country_state.parquet"

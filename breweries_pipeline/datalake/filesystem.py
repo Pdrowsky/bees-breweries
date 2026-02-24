@@ -39,33 +39,33 @@ def read_parquet(path: str) -> pd.DataFrame:
 
 # path getters for each layer
 
-def get_bronze_path():
+def get_bronze_path() -> str:
     """returns the path to the bronze layer"""
     return f"{LAKE_ROOT}/bronze/"
 
-def get_silver_path():
+def get_silver_path() -> str:
     """returns the path to the silver layer"""
     return f"{LAKE_ROOT}/silver/"
 
-def get_gold_path():
+def get_gold_path() -> str:
     """returns the path to the gold layer"""
     return f"{LAKE_ROOT}/gold/"
 
 # writing functions for each layer
 
-def save_to_bronze(data: list, filename: str):
+def save_to_bronze(data: list, filename: str) -> str:
     """saves data to the bronze layer as json"""
     save_path = get_bronze_path() + filename
     _atomic_json_write(data, save_path)
     return save_path
 
-def save_to_silver(data: pd.DataFrame, filename: str):
+def save_to_silver(data: pd.DataFrame, filename: str) -> str:
     """saves data to the silver layer as parquet"""
     save_path = get_silver_path() + filename
     save_to_parquet(data, save_path)
     return save_path
 
-def save_to_gold(data: pd.DataFrame, filename: str):
+def save_to_gold(data: pd.DataFrame, filename: str) -> str:
     """saves data to the gold layer as parquet"""
     save_path = get_gold_path() + filename
     save_to_parquet(data, save_path)

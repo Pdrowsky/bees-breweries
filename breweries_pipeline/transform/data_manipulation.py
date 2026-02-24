@@ -6,7 +6,7 @@ def json_to_dataframe(data: list) -> pd.DataFrame:
     """converts a list of json objects into a pandas dataframe"""
     return pd.DataFrame(data)
 
-def split_df_by_column(df: pd.DataFrame, column: str) -> dict:
+def split_df_by_column(df: pd.DataFrame, column: str) -> dict[str, pd.DataFrame]:
     """splits a dataframe into multiple dataframes based on the unique values of a given column,
     returns a dictionary with the unique values as keys and the corresponding dataframes as values"""
 
