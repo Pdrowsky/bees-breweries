@@ -1,17 +1,3 @@
-# - Data contract validation module -
-#
-# Validates data against expectations
-#
-# Returns validation results and error details, if any
-
-expected_brewery_fields = [
-    "id",
-    "name",
-    "brewery_type",
-    "city",
-    "country",
-    "state",
-]
 
 def validate_breweries_data(data: list):
     errors = {
