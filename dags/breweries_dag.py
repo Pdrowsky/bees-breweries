@@ -1,15 +1,15 @@
 from airflow.decorators import dag, task
-from datetime import datetime
+from datetime import timedelta
 
 from breweries_pipeline.jobs.ingest_bronze import ingest_to_bronze
 from breweries_pipeline.jobs.transform_silver import transform_silver
 from breweries_pipeline.jobs.build_gold import build_gold
 
 @dag(
-    dag_id="breweries",
-    start_date=datetime(2025, 1, 1),
-    schedule=None,
-    catchup=False,
+    dag_id= "breweries",
+    schedule_interval= "@daily",
+    retries= 2,
+    retry_delay= timedelta(minutes=5)
 )
 def breweries():
 
