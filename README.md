@@ -95,23 +95,12 @@ The pipeline reads the location from the `LAKE_ROOT` environment variable, with 
 
 ```python
 LAKE_ROOT = os.getenv("LAKE_ROOT", str(Path.cwd() / "storage"))
+```
 
 Which resolves to /opt/airflow/storage inside Docker.
 
 The storage/ folder is mounted as a volume, allowing data to persist outside containers.
-```
 
----
-
-### Setting up Airflow on Docker
-
-To build the image run ```docker compose build``` with Bash inside the repository root.
-
-On the first run, run ```docker compose up airflow-init``` to initialize the Airflow metadata database and to create the admin user.
-
-Start the Airflow stack by running ```docker compose up -d```, which will start all the required services.
-
-Open http://localhost:8080 on your browser to open up Airflow UI and log-in with admin:admin
 
 ---
 
