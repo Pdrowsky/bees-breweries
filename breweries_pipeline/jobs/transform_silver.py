@@ -20,9 +20,6 @@ def transform_silver(bronze_path: str):
     # remove duplicates based on id
     breweries_df = breweries_df.drop_duplicates(subset="id")
 
-    # drop rows with missing country or state values (ensure partitioning columns are not null)
-    breweries_df = breweries_df.dropna(subset=["country", "state"])
-
     # split dataframe based on country column
     breweries_by_country = split_df_by_column(breweries_df, "country")
 
