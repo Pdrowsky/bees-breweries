@@ -19,7 +19,7 @@ default_args = {
 @dag(
     dag_id="breweries",
     schedule="@daily",
-    start_date=pendulum.datetime(2026, 2, 24, tz="UTC"),
+    start_date=pendulum.datetime(2027, 2, 24, tz="UTC"), # future start date to avoid dag running as soon as the code is deployed
     catchup=False,
     max_active_runs=1,
     default_args=default_args,
