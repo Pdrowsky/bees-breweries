@@ -7,6 +7,7 @@ from unittest.mock import patch, Mock
 from pathlib import Path
 
 from breweries_pipeline.quality.contract import validate_breweries_data
+from breweries_pipeline.quality.integrity import validate_breweries_fields
 from breweries_pipeline.transform.data_manipulation import (
     json_to_dataframe,
     split_df_by_column,
@@ -92,9 +93,10 @@ class TestBronzeIngestionsFlow:
         """Test bronze layer handles data with missing fields gracefully"""
         # Remove required field from one record
         invalid_data = mock_brewery_data.copy()
-        del invalid_data[1]["state"]  # Remove state from record 2
+        del invalid_data[1]["id"]  # Remove id from record 2
         
-        is_valid, errors = validate_breweries_data(invalid_data)
+        is_valid, data_errors = validate_breweries_data(invalid_data)
+        errors = validate_breweries_fields(invalid_data)
         assert is_valid is True
         assert 1 in errors["missing_fields_indexes"]
         
@@ -276,12 +278,13 @@ class TestPipelineErrorRecovery:
         """Test that pipeline can recover if bronze layer partially fails"""
         # Simulate some records failing validation
         invalid_data = mock_brewery_data.copy()
-        del invalid_data[1]["state"]  # One bad record
+        del invalid_data[1]["name"]  # One bad record
         
-        is_valid, errors = validate_breweries_data(invalid_data)
+        integrity_errors = validate_breweries_fields(invalid_data)
+        
         # Filter bad records
         valid_data = [d for idx, d in enumerate(invalid_data) 
-                      if idx not in errors["missing_fields_indexes"]]
+                    if idx not in integrity_errors["missing_fields_indexes"]]
         
         # Continue with valid records
         bronze_path = save_to_bronze(valid_data, "test.json")

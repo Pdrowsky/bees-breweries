@@ -8,7 +8,10 @@ def validate_breweries_data(data: list):
     if not isinstance(data, list):
         errors["data_type"] = True
 
-    if len(data) == 0:
+    if data is None or len(data) == 0:
         errors["data_empty"] = True
     
-    return True, errors
+    if errors["data_type"] or errors["data_empty"]:
+        return False, errors
+    else:
+        return True, errors
