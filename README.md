@@ -156,7 +156,8 @@ docker compose ps
 
 1. In Airflow UI, navigate to **DAGs**
 2. Find and click on **breweries**
-3. Click the **Trigger DAG** button
+3. The DAG will be running/finished as it runs on deploy
+4. Click the **Trigger DAG** button to run it again
 
 ### Step 6: Verify Data Output
 
@@ -196,9 +197,6 @@ tree storage/
 ```bash
 # Stop all containers (data will be kept)
 docker compose down
-
-# Stop and remove volumes (full cleanup)
-docker compose down -v
 ```
 
 ---
