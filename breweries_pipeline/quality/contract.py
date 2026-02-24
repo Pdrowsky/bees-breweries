@@ -13,7 +13,7 @@ expected_brewery_fields = [
     "state",
 ]
 
-def validate_breweries_data(data):
+def validate_breweries_data(data: list):
     errors = {
         "data_type": False,
         "data_empty": False,

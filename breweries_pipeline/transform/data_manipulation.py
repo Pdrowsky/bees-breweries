@@ -10,12 +10,16 @@ def split_df_by_column(df: pd.DataFrame, column: str) -> dict:
     """splits a dataframe into multiple dataframes based on the unique values of a given column,
     returns a dictionary with the unique values as keys and the corresponding dataframes as values"""
 
+    # normalize missing values to unknown before spliting
+    df[column] = (
+        df[column]
+        .fillna("unknown")
+        .replace("", "unknown")
+    )
+
     splited_df = {}
 
     for key, group in df.groupby(column):
-        if pd.isna(key):
-            # if there is no value, bucket it under 'unknown' key
-            key = "unknown"
         splited_df[key] = group.reset_index(drop=True)
     
     return splited_df

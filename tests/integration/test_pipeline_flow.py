@@ -80,7 +80,7 @@ class TestBronzeIngestionsFlow:
         assert is_valid is True
         
         # Save to bronze
-        filename = "breweries_api/breweries/exec_time=2024-01-01T10:00:00/run_id=test_run/data.json"
+        filename = "breweries_api/breweries/exec_time=2024-01-01/run_id=test_run/data.json"
         filepath = save_to_bronze(mock_brewery_data, filename)
         
         # Verify file exists and can be read
@@ -113,7 +113,7 @@ class TestSilverTransformationFlow:
     def test_bronze_to_silver_transformation(self, mock_brewery_data, temp_lake_root):
         """Test complete bronze → silver transformation"""
         # Save to bronze first
-        bronze_filename = "breweries_api/breweries/exec_time=2024-01-01T10:00:00/run_id=test/data.json"
+        bronze_filename = "breweries_api/breweries/exec_time=2024-01-01/run_id=test/data.json"
         bronze_path = save_to_bronze(mock_brewery_data, bronze_filename)
         
         # Read and transform
@@ -213,7 +213,7 @@ class TestFullPipelineFlow:
         is_valid, errors = validate_breweries_data(mock_brewery_data)
         assert is_valid is True
         
-        bronze_filename = "breweries_api/breweries/exec_time=2024-01-01T10:00:00/run_id=test/data.json"
+        bronze_filename = "breweries_api/breweries/exec_time=2024-01-01/run_id=test/data.json"
         bronze_path = save_to_bronze(mock_brewery_data, bronze_filename)
         
         # Step 2: Transform and save to silver
@@ -224,9 +224,13 @@ class TestFullPipelineFlow:
         breweries_df = breweries_df[keep]
         breweries_df = breweries_df.drop_duplicates(subset="id")
         breweries_df = breweries_df.dropna(subset=["country", "state"])
+
+        # Store the original values before dropping
+        country_state_pairs = breweries_df[["id", "country", "state"]].copy()
         
         breweries_by_country = split_df_by_column(breweries_df, "country")
         silver_paths = []
+        partition_metadata = []
         
         for country, df in breweries_by_country.items():
             breweries_by_country[country] = split_df_by_column(df, "state")
@@ -235,10 +239,22 @@ class TestFullPipelineFlow:
                 filename = f"breweries/country={clean_string(country)}/state={clean_string(state)}/data.parquet"
                 filepath = save_to_silver(state_df, filename)
                 silver_paths.append(filepath)
+                partition_metadata.append({
+                    "filepath": filepath,
+                    "country": country,
+                    "state": state
+                })
         
         # Step 3: Aggregate and save to gold
         # Read back all silver partitions
-        all_silver_dfs = [read_from_silver(path) for path in silver_paths]
+        all_silver_dfs = []
+        for metadata in partition_metadata:
+            df = read_from_silver(metadata["filepath"])
+            # Add back the partition columns
+            df["country"] = metadata["country"]
+            df["state"] = metadata["state"]
+            all_silver_dfs.append(df)
+        
         combined_silver_df = pd.concat(all_silver_dfs, ignore_index=True)
         
         gold_agg = combined_silver_df.groupby(
@@ -251,3 +267,37 @@ class TestFullPipelineFlow:
         # Verify final output
         assert len(gold_agg) > 0
         assert gold_agg["brewery_count"].sum() == 4
+
+
+class TestPipelineErrorRecovery:
+    """Test suite for pipeline error handling and recovery"""
+    
+    def test_pipeline_recovery_from_bronze_failure(self, mock_brewery_data, temp_lake_root):
+        """Test that pipeline can recover if bronze layer partially fails"""
+        # Simulate some records failing validation
+        invalid_data = mock_brewery_data.copy()
+        del invalid_data[1]["state"]  # One bad record
+        
+        is_valid, errors = validate_breweries_data(invalid_data)
+        # Filter bad records
+        valid_data = [d for idx, d in enumerate(invalid_data) 
+                      if idx not in errors["missing_fields_indexes"]]
+        
+        # Continue with valid records
+        bronze_path = save_to_bronze(valid_data, "test.json")
+        
+        # Verify we saved what we could
+        loaded = read_from_bronze(bronze_path)
+        assert len(loaded) == len(mock_brewery_data) - 1
+    
+    def test_partial_silver_transformation(self, mock_brewery_data, temp_lake_root):
+        """Test silver transformation handles partial data"""
+        # Simulate scenario where some partitions fail
+        df = json_to_dataframe(mock_brewery_data)
+        
+        # Only transform California breweries
+        ca_df = df[df["state"] == "California"]
+        assert len(ca_df) > 0
+        
+        filepath = save_to_silver(ca_df, "breweries/country=US/state=california/data.parquet")
+        assert os.path.exists(filepath)

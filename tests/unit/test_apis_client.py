@@ -4,6 +4,7 @@ import requests
 import time
 
 from breweries_pipeline.apis.client import get_all_breweries
+from breweries_pipeline.apis.config import MAX_RETRIES
 
 class TestGetAllBreweries:
     """Test suite for API client"""
@@ -96,12 +97,14 @@ class TestGetAllBreweries:
         mock_response.raise_for_status.return_value = None
         mock_get.return_value = mock_response
         
-        get_all_breweries()
+        result = get_all_breweries()
         
         # Check that page number incremented
         calls = mock_get.call_args_list
+        assert len(calls) == 3
         assert calls[0][1]["params"]["page"] == 1
         assert calls[1][1]["params"]["page"] == 2
+        assert calls[2][1]["params"]["page"] == 3
 
     # ==================== RETRY LOGIC ====================
     
@@ -113,7 +116,8 @@ class TestGetAllBreweries:
         mock_get.side_effect = [
             requests.exceptions.ConnectionError("Connection failed"),
             requests.exceptions.ConnectionError("Connection failed"),
-            mock_response  # Success on 3rd attempt
+            mock_response, # Success on 3rd attempt
+            mock_response # End of pagination
         ]
         mock_response.json.side_effect = [[{"id": "1"}], []]
         mock_response.raise_for_status.return_value = None
@@ -132,7 +136,8 @@ class TestGetAllBreweries:
         mock_get.side_effect = [
             requests.exceptions.Timeout("Request timed out"),
             requests.exceptions.Timeout("Request timed out"),
-            mock_response  # Success on 3rd attempt
+            mock_response, # Success on 3rd attempt
+            mock_response # End of pagination
         ]
         mock_response.json.side_effect = [[{"id": "1"}], []]
         mock_response.raise_for_status.return_value = None
@@ -145,12 +150,14 @@ class TestGetAllBreweries:
     @patch('breweries_pipeline.apis.client.time.sleep')
     def test_max_retries_exhausted(self, mock_sleep, mock_get):
         """Test behavior when max retries are exhausted"""
-        # Make all attempts fail
         mock_get.side_effect = requests.exceptions.ConnectionError("Always fails")
         
-        # This should eventually raise or return empty after retries
-        with pytest.raises(Exception):
+        with pytest.raises(requests.exceptions.RequestException):
             get_all_breweries()
+        
+        # Verify all retry attempts were made
+        assert mock_get.call_count == MAX_RETRIES
+        assert mock_sleep.call_count >= MAX_RETRIES - 1
 
     # ==================== ERROR HANDLING ====================
     

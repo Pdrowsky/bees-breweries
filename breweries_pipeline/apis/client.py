@@ -37,7 +37,7 @@ def get_all_breweries() -> list:
 
             try:
                 response = requests.get(url, 
-                                        params=params, 
+                                        params=params.copy(), 
                                         headers=DEFAULT_HEADER, 
                                         timeout=REQUEST_TIMEOUT)
                 response.raise_for_status()
@@ -47,6 +47,10 @@ def get_all_breweries() -> list:
             except requests.exceptions.RequestException as e:
                 print(f"Request failed. Cause: {e}. Retrying in {RETRY_BACKOFF_SEC} seconds.")
                 time.sleep(RETRY_BACKOFF_SEC)
+        else:
+            raise requests.exceptions.RequestException(
+                f"Failed to fetch breweries after {MAX_RETRIES} retries."
+            )
 
         if not breweries:
             return all_breweries
