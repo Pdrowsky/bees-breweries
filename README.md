@@ -264,7 +264,7 @@ Why:
 - Testing: Each layer can be tested individualy.
 
 ### Orchestration with Apache Airflow
-Decision: Use Airflow with CeleryExecutor
+Decision: Use Airflow with CeleryExecutor.
 Why:
 - Distributed execution: Workers process tasks in parallel, allowing better scalability.
 - Monitoring: Built-in UI, logs and alerting hooks.
@@ -277,13 +277,13 @@ Why:
 - Easily swapable to a cloud storage by changing the filesystem adapter.
 
 ### Partitioning Strategy
-Decision: Partition silver layer by 'country' and 'state', but not by 'city'
+Decision: Partition silver layer by 'country' and 'state', but not by 'city'.
 Why:
 - Tradeoff between scan reduction and small file explosion.
 - In this specific scenario, with a local filesystem, partitioning by city as well creates too many small files
 
 ### File Formats
-Decision: Use JSON on bronze layer and parquet on both silver and gold
+Decision: Use JSON on bronze layer and parquet on both silver and gold.
 Why:
 - JSON on bronze layer, other than mandatory by case instructions, is the original payload format, assuring auditability.
 - Parquet because, as requested, is a columnar format and also happens to be compact, efficient and aligns well with datalake access patterns.
@@ -296,7 +296,7 @@ Why:
 - Allows good portions of the data to proceed through the pipeline despite partial failing.
 
 ### Schema and Data Standardization
-Decision: Select a minimal set of columns ASAP, deduplicate by id, drop rows with no country or state
+Decision: Select a minimal set of columns ASAP, deduplicate by id, drop rows with no country or state.
 Why:
 - Working with a lighter dataframe as soon as possible to optmize memory and performance.
 - Assuring no rows with missing country or state will break the grouping/partitioning step.
