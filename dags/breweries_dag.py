@@ -7,7 +7,7 @@ from breweries_pipeline.jobs.build_gold import build_gold
 
 @dag(
     dag_id= "breweries",
-    schedule_interval= "@daily", # Run daily
+    schedule= "@daily", # Run daily
     retries= 2, # Retry run 2 times max
     retry_delay= timedelta(minutes=5), # Delay between retries
     catchup=False, # Don't backfill missed runs
