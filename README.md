@@ -214,6 +214,56 @@ docker compose down -v
 
 ---
 
+## Monitoring and Alerting
+
+### Orchestration-Level Alerting
+
+The DAG counts with built-in Airflow alerting:
+- E-mail notifications: Sends e-mail alerts to @authors future coorporate e-mail: pedro.virgilio@bees.com.
+- Retrying: Automatically retries failed tasks up to 2 times (first run + 2 retries) without repeating e-mail alerts.
+
+Access the Airflow UI at http://localhost:8080 to monitor DAG runs, task status, and execution logs.
+
+### Data Quality Monitoring and Alerting
+
+The pipeline applies contract validation at the ingestion layer, where it:
+- Validates data structure and required fields
+- Approaches differently hard fails (incorrect type and empty data) and soft fails (missing fields)
+- Logs validation warnings for auditing
+
+Alerting to be done:
+1- Record validation rate: Alert if validation rate drops bellow a given treshold (e.g. 90%)
+2- Records droped: Alert if soft failures rate exceed a given treshold (e.g. 10%)
+
+### Pipeline Performance Monitoring
+
+The pipeline can emit metrics at key points:
+- Bronze layer: Records ingested count, records filtered out (soft fails)
+- Silver layer: Records remaining after deduplication, records with missing country/state (marked as "unknown"), partitions created count
+- Gold layer: Aggregated brewery count by type and location, appearence of new locations or types
+
+Alerting to be done:
+1- If number of records ingested in bronze is too high or too low
+2- If number of dropped rows or "unknown" marked rows exceeds a given treshold (e.g. 10%)
+3- If aggregated count is too high or too low
+4- If any new location or new country/state appears (possible data quality issue)
+
+### API Healt and Reliability
+
+The API client can log retry attempts, hard failing if retrys exceed stated limit (3 attempts).
+- Logged retry attempts can be used to track API reliability
+- Hard fail if all retries fail stops the execution of the pipeline if data is unreachable.
+
+Alerting to be done:
+1- Track retry attempt frquency over time
+2- Alert if any run requires more than a single retry to run, to catch any API issues as soon as possible
+
+### Current status
+
+Currently Airflow e-mail alerting is configured. Custom data quality and metrics can be implemented using xcom_push() and xcom_pull() to hold metrics and create sensors/alerts based on the values.
+
+---
+
 ## Design Decisions
 
 This section documents the main architectural and implementation choices made in this project, and why they were selected for this case.
