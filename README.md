@@ -50,9 +50,8 @@ bees-breweries/
 │   │   ├── client.py               # OpenBrew DB API client
 │   │   └── config.py               # API configuration
 │   ├── datalake/                   # Filesystem abstraction
-│   │   ├── __init__.py
-│   │   ├── filesystem.py           # Storage operations (read/write)
-│   │   └── naming_convention.py    # Path/file naming strategy
+│   │   ├── __init__.py       
+│   │   └── naming_convention.py    # Storage operations (read/write)
 │   ├── jobs/                       # ETL job implementations
 │   │   ├── __init__.py
 │   │   ├── ingest_bronze.py        # Raw data ingestion
@@ -63,22 +62,32 @@ bees-breweries/
 │   │   └── data_manipulation.py    # Column selection, dedup logic
 │   ├── quality/                    # Data quality checks
 │   │   ├── __init__.py
-│   │   └── validations.py          # Schema & contract validations
+│   │   ├── contract.py             # Contract validations
+│   │   └── integrity.py            # Integrity validations
 │   ├── analytics/                  # Analytical queries (future)
-│   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   └── gold_aggregations.py    # Aggregated data consolidation
 │   ├── config.py                   # Global pipeline configuration
 │   └── __init__.py
 ├── dags/                           # Airflow DAGs
 │   └── breweries_dag.py            # Main pipeline orchestration
+├── logs/                           # Airflow Logs
 ├── config/                         # Airflow configuration
 │   └── airflow.cfg                 # Airflow settings
 ├── storage/                        # Data lake root (mounted volume)
 │   ├── bronze/                     # Raw data layer
 │   ├── silver/                     # Curated data layer
 │   └── gold/                       # Analytics layer
+├── tests/                          # Unit and integration tests
+│   ├── __init__.py
+│   ├── conftest.py                 # Tests config file
+│   ├── integration.py              # Integration tests
+│   └── unit.py                     # Unit tests
 ├── Dockerfile                      # Custom Airflow image
 ├── docker-compose.yaml             # Full stack orchestration
-├── requirements.txt                # Python dependencies
+├── requirements.txt                # Solution python dependencies
+├── requirements-test.txt           # Tests python dependencies
+├── pytest.ini                      # Tests .ini file
 ├── .env                            # Environment variables
 └── README.md                       # This file
 ```
